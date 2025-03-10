@@ -1,14 +1,18 @@
 const { User, Leave } = require("../models");
+const { createLeaveSchema, updateLeaveSchema } = require("../validations/leaveValidation")
 
 module.exports = [
   {
     method: "POST",
     path: "/leaves",
     handler: async (request, h) => {
-      const { from, to, type, reason, emergencyContact } = request.payload;
-      const userId = request.auth.credentials.id;
       try {
-        const leave = await Leave.create({ from, to, type, reason, emergencyContact, userId });
+        const { error, value } = createLeaveSchema.validate(request.payload);
+        if (error) {
+          return h.response({ error: error.details[0].message }).code(400);
+        }
+        value.userId = request.auth.credentials.id;
+        const leave = await Leave.create(value);
         return h.response(leave).code(201);
       } catch (err) {
         return h.response({ error: err.message }).code(400);
@@ -62,6 +66,12 @@ module.exports = [
     path: "/leaves/{leaveId}",
     handler: async (request, h) => {
       const { leaveId } = request.params;
+
+      const { error, value } = updateLeaveSchema.validate(request.payload);
+      if (error) {
+        return h.response({ error: error.details[0].message }).code(400);
+      }
+
       const leave = await Leave.findByPk(leaveId);
 
       if (!leave) {
@@ -82,7 +92,7 @@ module.exports = [
         return h.response({ message: "Unauthorized to update this leave" }).code(403);
       }
 
-      await leave.update(request.payload); 
+      await leave.update(value); 
       return h.response(leave);
     },
   },
