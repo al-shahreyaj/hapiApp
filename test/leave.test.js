@@ -46,7 +46,7 @@ describe("Leave API Tests", () => {
       .send({
         from: "2024-03-01T18:00:00.000Z",
         to: "2024-03-05T18:00:00.000Z",
-        type: "sick",
+        type: "Sick",
         reason: "Feeling unwell",
         emergencyContact: "1234567890",
       });
