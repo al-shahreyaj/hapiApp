@@ -1,6 +1,9 @@
 require("dotenv").config();
 const Hapi = require("@hapi/hapi");
 const Jwt = require("@hapi/jwt");
+const Inert = require('@hapi/inert');
+
+const routes = require("./routes");
 
 const init = async () => {
   const server = Hapi.server({
@@ -9,23 +12,27 @@ const init = async () => {
   });
 
   await server.register(Jwt);
+  await server.register(Inert);
+
   server.auth.strategy("jwt", "jwt", {
     keys: process.env.JWT_SECRET,
     verify: { aud: false, iss: false, sub: false },
     validate: (artifacts) => ({ isValid: true, credentials: artifacts.decoded.payload }),
   });
+
   server.auth.default("jwt");
 
-  server.route(require("./routes/auth"));
-  server.route(require("./routes/leaves"));
+  server.route(routes);
 
   await server.start();
   console.log("Server running on", server.info.uri);
+
+  return server;
 };
 
-process.on("unhandledRejection", (err) => {
-  console.error(err);
-  process.exit(1);
-});
 
-init();
+module.exports = init;
+
+if (require.main === module) {
+  init()
+}
