@@ -6,7 +6,7 @@ package-lock.json
 yarn.lock
 
 # Environment variables
-.env
+# .env
 .env.local
 .env.development
 .env.test
@@ -39,3 +39,6 @@ Thumbs.db
 # Hapi.js-specific files (if applicable)
 hapi.log
 hapi_cache/
+
+# Others
+.nyc_output
